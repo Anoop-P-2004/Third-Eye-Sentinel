@@ -1,0 +1,3 @@
+backend/service_key.json
+backend/__pycache__/
+backend/.env
