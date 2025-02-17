@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 import jwt
-from flask import Flask,request,jsonify
+from flask import Flask,request,jsonify,render_template
 from flask_bcrypt import Bcrypt
 import firebase_admin
 from firebase_admin import credentials,firestore,db
@@ -25,6 +25,10 @@ def hash_password(password):
 
 def check_password(hashed_password,plain_password):
     return bcrypt.check_password_hash(hashed_password,plain_password)
+
+@app.route("/")
+def index():
+    return render_template("login.html")
 
 @app.route("/signup",methods=['POST'])
 def signup():
