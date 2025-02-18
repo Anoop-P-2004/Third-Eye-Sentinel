@@ -16,7 +16,7 @@ app=Flask(__name__,template_folder=TEMPLATE_DIR,static_folder=STATIC_DIR)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') #secret key is stored in .env file
 bcrypt=Bcrypt(app)
 
-cred = credentials.Certificate('backend/service_key.json')
+cred = credentials.Certificate('Third-Eye-Sentinel/backend/service_key.json')
 firebase_admin.initialize_app(cred)
 db=firestore.client()
 
