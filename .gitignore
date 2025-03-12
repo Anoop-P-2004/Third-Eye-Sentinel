@@ -1,3 +1,4 @@
 backend/service_key.json
 backend/__pycache__/
 backend/.env
+backend/model_weights.h5
