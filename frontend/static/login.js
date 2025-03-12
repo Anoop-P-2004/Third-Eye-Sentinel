@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     messageBox.style.display = "none";
     document.body.appendChild(messageBox);
 
-    function showMessage(message, duration = 3000) {
+    function showMessage(message, duration = 500) {
         messageBox.textContent = message;
         messageBox.style.display = "block";
         setTimeout(() => {
@@ -50,9 +50,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 localStorage.setItem("role", result.role);
                 
                 if (result.role === "user") {
-                    setTimeout(() => window.location.href = "user.html", 2000);
+                    const token = localStorage.getItem('access-token');
+                    window.location.href="/view_report?Authorization="+encodeURIComponent(token);
                 } else if (result.role === "admin") {
-                    setTimeout(() => window.location.href = "admin.html", 2000);
+                    const token = localStorage.getItem('access-token');
+                    window.location.href="/admin?Authorization="+encodeURIComponent(token);
                 }
             } else {
                 showMessage(result.message);
@@ -61,5 +63,5 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error:", error);
             showMessage("An error occurred. Please try again later.");
         }
-    });
+    }); 
 });
