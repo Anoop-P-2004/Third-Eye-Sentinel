@@ -1,0 +1,94 @@
+/* Background Image */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: url('background.png') no-repeat center center/cover;
+    text-align: center;
+    height: 100vh;
+}
+
+/* Transparent Div for the Title */
+.title-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.5); /* Transparent White Background */
+    padding: 7px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Title Styling */
+.title {
+    color: black;
+    font-size: 36px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Logout Button - Positioned at the Top Right */
+.logout-btn {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s ease-in-out;
+}
+
+.logout-btn:hover {
+    background-color: red;
+}
+
+/* Buttons Container */
+.container {
+    margin-top: 120px; /* Adjusted for space below the transparent div */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Transparent Buttons with Glassmorphism */
+.btn {
+    background: rgba(255, 255, 255, 0.2); /* Transparent Glass Effect */
+    border: 2px solid white;
+    color: black;
+    padding: 20px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 250px;
+    height: 250px;
+    transition: all 0.3s ease-in-out;
+    backdrop-filter: blur(5px); /* Glass Effect */
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+/* Make Icons Black */
+.btn img {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 10px;
+    filter: invert(0%) grayscale(100%) brightness(0%);
+}
