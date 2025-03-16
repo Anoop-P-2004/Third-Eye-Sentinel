@@ -1,0 +1,28 @@
+body {
+    background-image: url('/static/background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 50px;
+}
+
+.user-card {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+}
