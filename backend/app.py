@@ -6,7 +6,7 @@ from flask_bcrypt import Bcrypt
 import firebase_admin
 from firebase_admin import credentials,firestore,db
 from functools import wraps
-#from camera import startapplication
+from camera import startapplication
 import base64
 import cv2
 
