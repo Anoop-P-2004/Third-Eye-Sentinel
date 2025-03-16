@@ -2,7 +2,7 @@ import cv2
 from detection import AccidentDetectionModel
 import numpy as np
 
-model = AccidentDetectionModel("model.json", 'model_weights.h5')
+model = AccidentDetectionModel('model.json', 'model_weights.h5')
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 def startapplication():
