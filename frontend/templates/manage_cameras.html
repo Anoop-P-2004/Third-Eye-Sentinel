@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Cameras</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='manage_cameras.css') }}"/>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Camera Management</h1>
+
+        {% if cameras %}
+        <div class="camera-list">
+            {% for camera in cameras %}
+            <div class="camera-card">
+                <div>
+                    <strong>Camera Name:</strong> {{ camera.name }}
+                </div>
+                <div class="camera-actions">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('{{ camera.name }}')">Delete</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No cameras found.</p>
+        {% endif %}
+
+        <button class="btn btn-primary mt-3" onclick="navigateTo('/admin')">Back to Dashboard</button>
+
+        <!-- Add Icon -->
+        <button class="add-icon" onclick="openPopup()">+</button>
+
+        <!-- Popup Form -->
+        <div class="popup-overlay" id="popupOverlay">
+            <div class="popup">
+                <h3>Add Camera</h3>
+                <input type="text" id="cameraName" placeholder="Enter Camera Name" />
+                <button onclick="addCamera()">Add</button>
+                <button class="close-btn" onclick="closePopup()">Cancel</button>
+            </div>
+        </div>
+
+        <script src="{{ url_for('static', filename='manage_cameras.js') }}"></script>
+    </div>
+</body>
+</html>
