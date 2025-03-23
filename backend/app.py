@@ -203,7 +203,7 @@ def upload_video():
         video_file.save(video_path)
 
         # Call the function from camera.py
-        frame = startapplication(video_path)
+        pred, frame = startapplication(video_path)
 
         if frame is None:
             return jsonify({"message": "No accident detected", "frame": None})
@@ -214,7 +214,7 @@ def upload_video():
 
         return jsonify({
             "message": "Video processed successfully",
-            "frame": encoded_frame
+            "pred": encoded_frame
         })
     else:
         return render_template("error.html",msg="Only admins can view this..")

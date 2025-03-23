@@ -3,3 +3,4 @@ backend/__pycache__/
 backend/.env
 backend/model_weights.h5
 backend/cars.mp4
+uploads/
