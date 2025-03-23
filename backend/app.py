@@ -6,6 +6,9 @@ from flask_bcrypt import Bcrypt
 import firebase_admin
 from firebase_admin import credentials,firestore,db
 from functools import wraps
+from camera import startapplication
+import base64
+import cv2
 
 load_dotenv()
 
@@ -211,6 +214,41 @@ def make_admin():
     else:
         return render_template("error.html",msg="Only admins can view this..")
     
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.route('/upload', methods=['POST'])
+@token_required
+def upload_video():
+    if g.user["role"]=="admin":
+        if 'video' not in request.files:
+            return jsonify({"error": "No file uploaded"}), 400
+        
+        video_file = request.files['video']
+        
+        if video_file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+
+        video_path = os.path.join(UPLOAD_FOLDER, video_file.filename)
+        video_file.save(video_path)
+
+        # Call the function from camera.py
+        pred, frame = startapplication(video_path)
+
+        if frame is None:
+            return jsonify({"message": "No accident detected", "frame": None})
+
+        # Encode frame as JPEG
+        _, buffer = cv2.imencode('.jpg', frame)
+        encoded_frame = base64.b64encode(buffer).decode('utf-8')
+
+        return jsonify({
+            "message": "Video processed successfully",
+            "pred": encoded_frame
+        })
+    else:
+        return render_template("error.html",msg="Only admins can view this..")
+
 
 if __name__=="__main__":
     app.run(debug=True)
