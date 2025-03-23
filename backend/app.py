@@ -121,7 +121,37 @@ def manage_user():
 @token_required
 def manage_cameras():
     if g.user["role"]=="admin":
-        return render_template("manage_cameras.html")
+        docs=db.collection("cameras").stream()
+        cameras=[{"name":doc.id} for doc in docs]
+        return render_template("manage_cameras.html",cameras=cameras)
+    else:
+        return render_template("error.html",msg="Only admins can view this..")
+
+@app.route("/manage_cameras/add_camera",methods=["POST"])
+@token_required
+def add_camera():
+    if g.user["role"]=="admin":
+        data=request.get_json()
+        cameraName=data["name"]
+        camera={
+            "name": cameraName,
+            "location":"Palakkad"
+        }
+        db.collection("cameras").document(cameraName).set(camera)
+        return jsonify({"flag":0,"message":"Camera added successfully..."})
+       
+    else:
+        return render_template("error.html",msg="Only admins can view this..")
+
+@app.route("/manage_cameras/delete_camera",methods=["POST"])
+@token_required
+def delete_camera():
+    if g.user["role"]=="admin":
+        data=request.get_json()
+        cameraName=data["name"]
+        db.collection("cameras").document(cameraName).delete()
+        return jsonify({"flag":0,"message":"Camera deleted successfully..."})
+       
     else:
         return render_template("error.html",msg="Only admins can view this..")
 
