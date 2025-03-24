@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static',filename = 'admin.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static',filename = 'admin.css') }}">
 </head>
 <body>
     <!-- Transparent Div with Title -->
@@ -15,6 +15,7 @@
     <button class="logout-btn" onclick="logout()">Logout</button>
 
     <div class="container">
+        <!-- First Row -->
         <button class="btn" onclick="navigateTo('/manage_cameras')">
             <img src="{{url_for('static',filename='camera-icon.png')}}" alt="Manage Cameras">
             <span><b>Manage Cameras</b></span>
@@ -27,19 +28,24 @@
             <img src="{{url_for('static',filename='report-icon.png')}}" alt="View Report">
             <span><b>View Report</b></span>
         </button>
+
+        <!-- Second Row -->
         <button class="btn" onclick="navigateTo('/manage_admin')">
             <img src="{{url_for('static',filename='admin-icon.png')}}" alt="Manage Admin">
             <span><b>Manage Admin</b></span>
         </button>
+        <button class="btn" onclick="navigateTo('/demo')">
+            <span><b>Demo</b></span>
+        </button>
     </div>
-    
+
     <script>
         function navigateTo(page) {
             const token = localStorage.getItem('access-token');
-            window.location.href=page+"?Authorization="+encodeURIComponent(token);
+            window.location.href = page + "?Authorization=" + encodeURIComponent(token);
         }
 
-         function logout() {
+        function logout() {
             alert("Logging out...");
             localStorage.clear();
             window.location.href = "/";
