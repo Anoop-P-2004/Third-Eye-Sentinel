@@ -1,7 +1,7 @@
 // View Report Details
 function viewDetails(accidentId) {
     const token = localStorage.getItem('access-token');
-    const path = /view_report/get_details?Authorization=${encodeURIComponent(token)}&id=${accidentId};
+    const path="/view_report/get_details?Authorization="+encodeURIComponent(token)+"&id="+accidentId;
 
     fetch(path)
         .then(response => {
@@ -40,7 +40,7 @@ function closePopup() {
 // Navigation to Dashboard
 function navigateTo(page) {
     const token = localStorage.getItem('access-token');
-    window.location.href = ${page}?Authorization=${encodeURIComponent(token)};
+    window.location.href = page + "?Authorization=" + encodeURIComponent(token);
 }
 
 // Logout Function
