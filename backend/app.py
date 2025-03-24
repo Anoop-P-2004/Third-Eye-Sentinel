@@ -1,28 +1,71 @@
 import os
+import threading
 from dotenv import load_dotenv
 import jwt
 from flask import Flask,request,jsonify,render_template,g
 from flask_bcrypt import Bcrypt
 import firebase_admin
-from firebase_admin import credentials,firestore,db
+from firebase_admin import credentials,firestore,db,storage
 from functools import wraps
-#from camera import startapplication
+from camera import startapplication
+from lime_explainer import LIMEExplainer
 import base64
 import cv2
+import uuid
+import datetime
+from datetime import datetime, timedelta
+import matplotlib
+matplotlib.use('Agg')  # Use non-GUI backend before importing pyplot
+import matplotlib.pyplot as plt
 
 load_dotenv()
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(_file_), '..'))
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'frontend', 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'frontend', 'static')
 
-app=Flask(__name__,template_folder=TEMPLATE_DIR,static_folder=STATIC_DIR)
+app=Flask(_name_,template_folder=TEMPLATE_DIR,static_folder=STATIC_DIR)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') #secret key is stored in .env file
 bcrypt=Bcrypt(app)
 
 cred = credentials.Certificate('backend/service_key.json')
-firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred, {"storageBucket": "third-eye-sentinel.firebasestorage.app"})
 db=firestore.client()
+bucket = storage.bucket()
+
+class LIMEExplainerThread(threading.Thread):
+    def _init_(self, frame):
+        super()._init_()
+        self.frame = frame
+
+    def run(self):
+        # Generate a unique filename
+        unique_id = str(uuid.uuid4())[:8]
+        filename = f"lime_{unique_id}.png"
+        local_path = f"lime_images/{filename}"
+
+        # Run LIME explanation
+        explainer = LIMEExplainer(self.frame)
+        fig = explainer.explain()
+        fig.savefig(local_path) 
+
+        # Upload to Firebase Storage
+        blob = bucket.blob(f"lime_images/{filename}")
+        blob.upload_from_filename(local_path)
+        blob.make_public()
+
+        # Get public URL
+        image_url = blob.public_url
+
+        accident_data = {
+            "id":unique_id,
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "time": datetime.now().strftime("%H:%M:%S"),
+            "image_url": image_url
+        }
+        db.collection("Accident").document(unique_id).set(accident_data)
+        os.remove(local_path)
+
 
 def token_required(f):
     @wraps(f)
@@ -103,7 +146,8 @@ def login():
     if(check_password(user["password"],password)):
         payload={
             "username":user["username"],
-            "role":user["role"]
+            "role":user["role"],
+            "exp": datetime.utcnow() + timedelta(hours=1)
         }
         token=jwt.encode(payload,app.config["SECRET_KEY"])
         return jsonify({"flag":0,"access-token":token,"role":user["role"]})
@@ -124,7 +168,37 @@ def manage_user():
 @token_required
 def manage_cameras():
     if g.user["role"]=="admin":
-        return render_template("manage_cameras.html")
+        docs=db.collection("cameras").stream()
+        cameras=[{"name":doc.id} for doc in docs]
+        return render_template("manage_cameras.html",cameras=cameras)
+    else:
+        return render_template("error.html",msg="Only admins can view this..")
+
+@app.route("/manage_cameras/add_camera",methods=["POST"])
+@token_required
+def add_camera():
+    if g.user["role"]=="admin":
+        data=request.get_json()
+        cameraName=data["name"]
+        camera={
+            "name": cameraName,
+            "location":"Palakkad"
+        }
+        db.collection("cameras").document(cameraName).set(camera)
+        return jsonify({"flag":0,"message":"Camera added successfully..."})
+       
+    else:
+        return render_template("error.html",msg="Only admins can view this..")
+
+@app.route("/manage_cameras/delete_camera",methods=["POST"])
+@token_required
+def delete_camera():
+    if g.user["role"]=="admin":
+        data=request.get_json()
+        cameraName=data["name"]
+        db.collection("cameras").document(cameraName).delete()
+        return jsonify({"flag":0,"message":"Camera deleted successfully..."})
+       
     else:
         return render_template("error.html",msg="Only admins can view this..")
 
@@ -161,7 +235,16 @@ def remove_admin():
 @app.route("/view_report")
 @token_required
 def view_report():
-        return render_template("view_report.html")
+        docs=db.collection("Accident").stream()
+        accidents=[{"id":doc.id} for doc in docs]
+        return render_template("view_report.html",reports=accidents)
+@app.route("/view_report/get_details")
+@token_required
+def get_details():
+        accident_id=request.args.get("id")
+        doc = db.collection("Accident").document(accident_id).get()
+        doc_dict = doc.to_dict()
+        return jsonify(doc_dict)
 
 @app.route("/manage_user/delete_user")
 @token_required
@@ -203,22 +286,25 @@ def upload_video():
         video_file.save(video_path)
 
         # Call the function from camera.py
-        frame = startapplication(video_path)
+        pred, frame = startapplication(video_path)
 
         if frame is None:
             return jsonify({"message": "No accident detected", "frame": None})
 
+        lime_thread = LIMEExplainerThread(frame)
+        lime_thread.start()
+
         # Encode frame as JPEG
-        _, buffer = cv2.imencode('.jpg', frame)
-        encoded_frame = base64.b64encode(buffer).decode('utf-8')
+        #_, buffer = cv2.imencode('.jpg', frame)
+        #encoded_frame = base64.b64encode(buffer).decode('utf-8')
 
         return jsonify({
-            "message": "Video processed successfully",
-            "frame": encoded_frame
+            "message": "Accident detected",
+            "pred": pred
         })
     else:
         return render_template("error.html",msg="Only admins can view this..")
 
 
-if __name__=="__main__":
-    app.run(debug=True)
+if _name=="main_":
+    app.run(host='0.0.0.0',port=5000,debug=True)
