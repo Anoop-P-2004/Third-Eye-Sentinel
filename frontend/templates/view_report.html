@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Reports</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='view_report.css') }}" />
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Accident Reports</h2>
+
+        {% if reports %}
+        <div class="report-list">
+            {% for report in reports %}
+            <div class="report-card">
+                <div>
+                    <strong>Accident ID:</strong> {{ report.id }}
+                </div>
+                <div class="report-actions">
+                    <button type="button" class="btn btn-info btn-sm" onclick="viewDetails('{{ report.id }}')">View Details</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No reports available.</p>
+        {% endif %}
+
+        {% if g.user["role"] == "admin" %}
+            <button class="btn btn-primary mt-3" onclick="navigateTo('/admin')">Back to Dashboard</button>
+        {% else %}
+            <button class="btn btn-danger logout-btn" onclick="logout()">Logout</button>
+        {% endif %}
+
+        <!-- Popup for Report Details -->
+        <div class="popup-overlay" id="popupOverlay">
+            <div class="popup">
+                <h3>Accident Details</h3>
+                <img id="accidentImage" src="" alt="Accident Frame" style="display:none; width:250px; height:250px; border-radius: 8px;" />
+                <p><strong>Accident ID:</strong> <span id="popupAccidentId"></span></p>
+                <p><strong>Date:</strong> <span id="popupDate"></span></p>
+                <p><strong>Time:</strong> <span id="popupTime"></span></p>
+                <button class="close-btn" onclick="closePopup()">Close</button>
+            </div>
+        </div>
+
+        <script src="{{ url_for('static',filename='view_report.js') }}"></script>
+    </div>
+</body>
+</html>
