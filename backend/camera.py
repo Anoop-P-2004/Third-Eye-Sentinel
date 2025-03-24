@@ -9,6 +9,7 @@ def startapplication(path):
     video = cv2.VideoCapture(path)
     max_prob = 0
     best_frame = None
+    best_pred="Non Accident"
 
     while True:
         ret, frame = video.read()
@@ -22,12 +23,13 @@ def startapplication(path):
             current_prob = round(prob[0][0] * 100, 2)
             if current_prob > max_prob:
                 max_prob = current_prob
+                best_pred=pred
                 best_frame = frame.copy()
 
     video.release()
     cv2.destroyAllWindows()
     if max_prob > 0.5:
-        return pred, best_frame
+        return best_pred, best_frame
     return None 
 
 

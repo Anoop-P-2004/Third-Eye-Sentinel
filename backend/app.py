@@ -1,14 +1,21 @@
 import os
+import threading
 from dotenv import load_dotenv
 import jwt
 from flask import Flask,request,jsonify,render_template,g
 from flask_bcrypt import Bcrypt
 import firebase_admin
-from firebase_admin import credentials,firestore,db
+from firebase_admin import credentials,firestore,db,storage
 from functools import wraps
 from camera import startapplication
+from lime_explainer import LIMEExplainer 
 import base64
 import cv2
+import uuid
+import datetime
+import matplotlib
+matplotlib.use('Agg')  # Use non-GUI backend before importing pyplot
+import matplotlib.pyplot as plt
 
 load_dotenv()
 
@@ -21,8 +28,43 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') #secret key is stored in .env
 bcrypt=Bcrypt(app)
 
 cred = credentials.Certificate('backend/service_key.json')
-firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred, {"storageBucket": "third-eye-sentinel.firebasestorage.app"})
 db=firestore.client()
+bucket = storage.bucket()
+
+class LIMEExplainerThread(threading.Thread):
+    def __init__(self, frame):
+        super().__init__()
+        self.frame = frame
+
+    def run(self):
+        # Generate a unique filename
+        unique_id = str(uuid.uuid4())[:8]
+        filename = f"lime_{unique_id}.png"
+        local_path = f"lime_images/{filename}"
+
+        # Run LIME explanation
+        explainer = LIMEExplainer(self.frame)
+        fig = explainer.explain()
+        fig.savefig(local_path) 
+
+        # Upload to Firebase Storage
+        blob = bucket.blob(f"lime_images/{filename}")
+        blob.upload_from_filename(local_path)
+        blob.make_public()
+
+        # Get public URL
+        image_url = blob.public_url
+
+        accident_data = {
+            "id":unique_id,
+            "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+            "time": datetime.datetime.now().strftime("%H:%M:%S"),
+            "image_url": image_url
+        }
+        db.collection("accident_reports").document(unique_id).set(accident_data)
+        os.remove(local_path)
+
 
 def token_required(f):
     @wraps(f)
@@ -238,17 +280,20 @@ def upload_video():
         if frame is None:
             return jsonify({"message": "No accident detected", "frame": None})
 
+        lime_thread = LIMEExplainerThread(frame)
+        lime_thread.start()
+
         # Encode frame as JPEG
-        _, buffer = cv2.imencode('.jpg', frame)
-        encoded_frame = base64.b64encode(buffer).decode('utf-8')
+        #_, buffer = cv2.imencode('.jpg', frame)
+        #encoded_frame = base64.b64encode(buffer).decode('utf-8')
 
         return jsonify({
-            "message": "Video processed successfully",
-            "pred": encoded_frame
+            "message": "Accident detected",
+            "pred": pred
         })
     else:
         return render_template("error.html",msg="Only admins can view this..")
 
 
 if __name__=="__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0',port=5000,debug=True)
