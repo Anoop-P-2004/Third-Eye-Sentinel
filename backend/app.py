@@ -13,17 +13,18 @@ import base64
 import cv2
 import uuid
 import datetime
+from datetime import datetime, timedelta
 import matplotlib
 matplotlib.use('Agg')  # Use non-GUI backend before importing pyplot
 import matplotlib.pyplot as plt
 
 load_dotenv()
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(_file_), '..'))
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'frontend', 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'frontend', 'static')
 
-app=Flask(__name__,template_folder=TEMPLATE_DIR,static_folder=STATIC_DIR)
+app=Flask(_name_,template_folder=TEMPLATE_DIR,static_folder=STATIC_DIR)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') #secret key is stored in .env file
 bcrypt=Bcrypt(app)
 
@@ -33,8 +34,8 @@ db=firestore.client()
 bucket = storage.bucket()
 
 class LIMEExplainerThread(threading.Thread):
-    def __init__(self, frame):
-        super().__init__()
+    def _init_(self, frame):
+        super()._init_()
         self.frame = frame
 
     def run(self):
@@ -58,8 +59,8 @@ class LIMEExplainerThread(threading.Thread):
 
         accident_data = {
             "id":unique_id,
-            "date": datetime.datetime.now().strftime("%Y-%m-%d"),
-            "time": datetime.datetime.now().strftime("%H:%M:%S"),
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "time": datetime.now().strftime("%H:%M:%S"),
             "image_url": image_url
         }
         db.collection("Accident").document(unique_id).set(accident_data)
@@ -145,7 +146,8 @@ def login():
     if(check_password(user["password"],password)):
         payload={
             "username":user["username"],
-            "role":user["role"]
+            "role":user["role"],
+            "exp": datetime.utcnow() + timedelta(hours=1)
         }
         token=jwt.encode(payload,app.config["SECRET_KEY"])
         return jsonify({"flag":0,"access-token":token,"role":user["role"]})
@@ -233,22 +235,16 @@ def remove_admin():
 @app.route("/view_report")
 @token_required
 def view_report():
-    if g.user["role"]=="admin":
         docs=db.collection("Accident").stream()
-        accidents=[{"id":doc.id,"date":doc.date} for doc in docs]
-        return render_template("view_report.html",accidents=accidents)
-    else:
-        return render_template("error.html",msg="Only admins can view this..")
+        accidents=[{"id":doc.id} for doc in docs]
+        return render_template("view_report.html",reports=accidents)
 @app.route("/view_report/get_details")
 @token_required
 def get_details():
-    if g.user["role"]=="admin":
         accident_id=request.args.get("id")
-        doc = db.collection("accident_reports").document(accident_id).get()
+        doc = db.collection("Accident").document(accident_id).get()
         doc_dict = doc.to_dict()
         return jsonify(doc_dict)
-    else:
-        return render_template("error.html",msg="Only admins can view this..")
 
 @app.route("/manage_user/delete_user")
 @token_required
@@ -310,5 +306,5 @@ def upload_video():
         return render_template("error.html",msg="Only admins can view this..")
 
 
-if __name__=="__main__":
+if _name=="main_":
     app.run(host='0.0.0.0',port=5000,debug=True)
