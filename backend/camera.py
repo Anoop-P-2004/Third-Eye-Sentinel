@@ -5,6 +5,7 @@ import numpy as np
 model = AccidentDetectionModel('backend\model.json', 'backend\model_weights.h5')
 font = cv2.FONT_HERSHEY_SIMPLEX
 
+
 def startapplication(path):
     video = cv2.VideoCapture(path)
     max_prob = 0

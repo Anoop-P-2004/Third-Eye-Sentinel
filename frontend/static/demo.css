@@ -1,0 +1,57 @@
+
+body {
+    background-image: url('/static/background.png');
+    background-size: cover;
+    background-position: center;
+    font-family: Arial, sans-serif;
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    margin-top: 100px;
+}
+
+.upload-box {
+    background: rgba(255, 255, 255, 0.2); /* Transparent white */
+    backdrop-filter: blur(10px); /* Blur effect */
+    padding: 20px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+input, button {
+    padding: 10px;
+    margin: 10px;
+    font-size: 16px;
+}
+
+#resultMessage {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffeb3b; /* Bright yellow for visibility */
+    margin-top: 15px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Soft shadow for better readability */
+    font-family: 'Arial', sans-serif;
+}
+
+
+.dashboard-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #2252ff; /* Orange color */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-btn:hover {
+    background-color: #e64a19; /* Darker shade on hover */
+}

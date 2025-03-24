@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Admins</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='manage_admin.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Admin Management</h2>
+
+        {% if users %}
+        <div class="user-list">
+            {% for user in users if user.role == 'admin' %}
+            <div class="user-card">
+                <div>
+                    <strong>Username:</strong> {{ user.username }}<br>
+                    <strong>Role:</strong> {{ user.role }}
+                </div>
+                <div class="user-actions">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('{{ user.username }}')">Delete</button>
+                    <button type="button" class="btn btn-success btn-sm" onclick="makeAdmin('{{ user.username }}')">Remove Admin</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No users found.</p>
+        {% endif %}
+
+        <button class="btn btn-primary mt-3" onclick="navigateTo('/admin')">Back to Dashboard</button>
+    </div>
+
+    <script src="{{ url_for('static', filename='manage_admin.js') }}"></script>
+</body>
+</html>
