@@ -62,7 +62,7 @@ class LIMEExplainerThread(threading.Thread):
             "time": datetime.datetime.now().strftime("%H:%M:%S"),
             "image_url": image_url
         }
-        db.collection("accident_reports").document(unique_id).set(accident_data)
+        db.collection("Accident").document(unique_id).set(accident_data)
         os.remove(local_path)
 
 
@@ -233,7 +233,22 @@ def remove_admin():
 @app.route("/view_report")
 @token_required
 def view_report():
-        return render_template("view_report.html")
+    if g.user["role"]=="admin":
+        docs=db.collection("Accident").stream()
+        accidents=[{"id":doc.id,"date":doc.date} for doc in docs]
+        return render_template("view_report.html",accidents=accidents)
+    else:
+        return render_template("error.html",msg="Only admins can view this..")
+@app.route("/view_report/get_details")
+@token_required
+def get_details():
+    if g.user["role"]=="admin":
+        accident_id=request.args.get("id")
+        doc = db.collection("accident_reports").document(accident_id).get()
+        doc_dict = doc.to_dict()
+        return jsonify(doc_dict)
+    else:
+        return render_template("error.html",msg="Only admins can view this..")
 
 @app.route("/manage_user/delete_user")
 @token_required
