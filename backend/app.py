@@ -61,6 +61,7 @@ class LIMEExplainerThread(threading.Thread):
             "id":unique_id,
             "date": datetime.now().strftime("%Y-%m-%d"),
             "time": datetime.now().strftime("%H:%M:%S"),
+            "createdAt": datetime.now(),
             "image_url": image_url
         }
         db.collection("Accident").document(unique_id).set(accident_data)
@@ -235,7 +236,7 @@ def remove_admin():
 @app.route("/view_report")
 @token_required
 def view_report():
-        docs=db.collection("Accident").stream()
+        docs = db.collection("Accident").order_by("createdAt", direction=firestore.Query.DESCENDING).stream()
         accidents=[{"id":doc.id} for doc in docs]
         return render_template("view_report.html",reports=accidents)
 @app.route("/view_report/get_details")
