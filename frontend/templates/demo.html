@@ -31,6 +31,7 @@ function navigateTo(page) {
 
 
     document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+        document.getElementById('resultMessage').innerText = "";
         event.preventDefault();
 
         let formData = new FormData();

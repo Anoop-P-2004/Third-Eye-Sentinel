@@ -31,7 +31,7 @@ def startapplication(path):
     cv2.destroyAllWindows()
     if max_prob > 0.5:
         return best_pred, best_frame
-    return None 
+    return None,None
 
 
 if __name__ == '__main__':
